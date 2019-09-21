@@ -68,6 +68,7 @@ Regex * regexParse(char *regex_str) {
         case '+':
             break;
         default:
+            REGEX_PUSH();
             break;
         }
 

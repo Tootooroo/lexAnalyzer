@@ -45,6 +45,14 @@ typedef struct Regex {
 
 #define REGEX_OP_IS_MARKER(OP) ((OP) > REGEX_OP_RIGHT_PAREN)
 
+#define REGEX_PUSH(R, R1) ((R1)->down = (R), (R) = (R1), 0)
+#define REGEX_POP(R) ({\
+    Regex *poped = R;\
+    (R) = (R)->down;\
+    poped->down = NULL; \
+    poped;\
+})
+
 /* Prototypes */
 Regex * regexCreate(RegexOp op, char *str);
 Regex * regexDuplicate(Regex *r);
@@ -52,4 +60,7 @@ void    regexDestruct(Regex *r);
 _Status_t regexAddSub(Regex *r, Regex *sub);
 _Status_t regexPushSub(Regex *r, Regex *sub);
 
+// Use Regex as as stack
+
+// Regex parse function
 Regex * regexParse(char *regex_str);
