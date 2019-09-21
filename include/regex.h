@@ -5,6 +5,7 @@
 typedef enum RegexOp {
     REGEX_OP_CONCATE,
     REGEX_OP_ALTERNATE,
+    REGEX_OP_CHAR,
     REGEX_OP_CHAR_CLASS,
     REGEX_OP_START,
     REGEX_OP_PLUS,

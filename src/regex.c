@@ -28,15 +28,21 @@ Regex * regexDuplicate(Regex *r) {
 
 void regexDestruct(Regex *r) {
     zFree((void **)&REGEX_STR(r));
-    listRelease(REGEX_SUBS(r));
+
+    if (REGEX_SUBS(r) != NULL)
+        listRelease(REGEX_SUBS(r));
 }
 
 _Status_t regexAddSub(Regex *r, Regex *sub) {
+    if (REGEX_SUBS(r) == NULL)
+        REGEX_SET_SUBS(r, listCreate());
     listAppend(REGEX_SUBS(r), sub);
     return OK;
 }
 
 _Status_t regexPushSub(Regex *r, Regex *sub) {
+    if (REGEX_SUBS(r) == NULL)
+        REGEX_SET_SUBS(r, listCreate());
     listPush(REGEX_SUBS(r), sub);
     return OK;
 }
@@ -68,7 +74,6 @@ Regex * regexParse(char *regex_str) {
         case '+':
             break;
         default:
-            REGEX_PUSH();
             break;
         }
 
@@ -82,16 +87,23 @@ Regex * regexParse(char *regex_str) {
 /* Collapse collection of continuous regex into one regex tree
  * with specified operation */
 private void doCollapse(Regex *top, RegexOp op) {
-    Regex *current = top;
+    Regex *current = top, *next;
 
     Regex *new = regexCreate(op, NULL);
 
     while (current != NULL && !REGEX_OP_IS_MARKER(REGEX_OP(top))) {
         if (REGEX_OP(current) == REGEX_OP_CONCATE) {
+            listJoin(current->subs, new->subs);
+            new->subs = current->subs;
 
+            next = REGEX_DOWN(current);
+            free(current);
         } else {
             regexPushSub(new, current);
+
+            next = REGEX_DOWN(current);
         }
+        current = next;
     }
 }
 
@@ -106,4 +118,6 @@ private void doVerticalBar(Regex *top) {
     doConcatenation(top);
 }
 
-private void doLeftParen(Regex *top) {}
+private void doLeftParen(Regex *top) {
+
+}
