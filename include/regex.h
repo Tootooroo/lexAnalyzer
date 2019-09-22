@@ -10,8 +10,8 @@ typedef enum RegexOp {
     REGEX_OP_START,
     REGEX_OP_PLUS,
     REGEX_OP_ANY_CHAR,
-    REGEX_OP_RIGHT_PAREN,
     REGEX_OP_LEFT_PAREN,
+    REGEX_OP_RIGHT_PAREN,
     REGEX_OP_VERTICAL_BAR
 } RegexOp;
 
@@ -58,8 +58,8 @@ typedef struct Regex {
 Regex * regexCreate(RegexOp op, char *str);
 Regex * regexDuplicate(Regex *r);
 void    regexDestruct(Regex *r);
-_Status_t regexAddSub(Regex *r, Regex *sub);
-_Status_t regexPushSub(Regex *r, Regex *sub);
+_Status_t regexAddSub(Regex *sub);
+_Status_t regexPushSub(Regex *sub);
 
 // Use Regex as as stack
 
