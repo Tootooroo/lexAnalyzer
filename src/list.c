@@ -24,7 +24,7 @@ private _Status_t listNodeAppend(listNode *, listNode *);
 private _Status_t listNodeDel(listNode *);
 private listNode * listNodePrev(listNode *);
 private listNode * listNodeNext(listNode *);
-private listNode * listNodeHead(listNode *);
+//private listNode * listNodeHead(listNode *);
 private listNode * listNodeTail(listNode *);
 private _Status_t listNodeCancate(listNode *, listNode *);
 
@@ -69,7 +69,7 @@ _Status_t listAppend(list *l, void *value) {
         listSetNode(l, node);
         listSetTail(l, node);
     } else {
-        status = listNodeCancate(listGetTail(l), node);
+        status = listNodeAppend(listGetNode(l), node);
         listSetTail(l, node);
     }
 
@@ -96,17 +96,16 @@ _Status_t listPush(list *l, void *value) {
 void * listPop(list *l) {
     if (isNull(l)) return NULL;
 
-    listNode *node, *head;
+    listNode *node;
 
     node = listGetNode(l);
     if (node == NULL) return NULL;
 
-    head = listNodeNext(node);
-    if (head) head->prev = NULL;
-
-
     // Move head to next of current head
     listSetNode(l, listNodeNext(node));
+
+    node->next = NULL;
+    node->prev = NULL;
 
     void *value = node->value;
     free(node);
@@ -143,6 +142,7 @@ _Status_t listDelNode(list *l, void *key) {
     return listNodeDel(node);
 }
 
+/*
 _Status_t listSort_step(list *l) {
     return OK;
 }
@@ -150,6 +150,7 @@ _Status_t listSort_step(list *l) {
 _Status_t listSort(list *l) {
     return OK;
 }
+*/
 
 list * listDup(const list *l) {
     if (isNull(l) || isNull(l->dup))
@@ -179,9 +180,12 @@ listNode * listSearch(const list *l, const void *key) {
         return null;
 
     listIter iter = listGetIter((list *)l, LITER_FORWARD);
-    listNode *node;
+    listNode *node = null;
 
-    while (node = listNext(&iter)) {
+    while (true) {
+        node = listNext(&iter);
+        if (node == null) break;
+
         if (l->match(node->value, key))
             break;
     }
@@ -212,7 +216,7 @@ _Bool listIsIterValid(listIter i) {
 }
 
 listIter listGetIter(list *l, LITER_DIR dir) {
-    listIter iter = { 0 };
+    listIter iter = { 0, 0, 0 };
 
     if (isNull(l) || !isListDirValid(dir)) {
         /* Return a invalid iterator */
@@ -376,6 +380,7 @@ private listNode * listNodeNext(listNode *node) {
     return node->next;
 }
 
+/*
 private listNode * listNodeHead(listNode *node) {
     if (isNull(node))
        return null;
@@ -385,6 +390,7 @@ private listNode * listNodeHead(listNode *node) {
     }
     return node;
 }
+*/
 
 private listNode * listNodeTail(listNode *node) {
     if (isNull(node))
@@ -453,9 +459,8 @@ void list_Basic(void **state) {
 
     assert_non_null(listSearch(l, (void *)(valueArray + 256)));
 
-    listNode *found;
     for (i = 0; i < bound; i++) {
-        found = listSearch(l, (void *)(valueArray + i));
+        listNode *found = listSearch(l, (void *)(valueArray + i));
         assert_non_null(found);
     }
 

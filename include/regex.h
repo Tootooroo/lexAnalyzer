@@ -3,6 +3,7 @@
 #include "list.h"
 
 typedef enum RegexOp {
+    REGEX_OP_ROOT,
     REGEX_OP_CONCATE,
     REGEX_OP_ALTERNATE,
     REGEX_OP_CHAR,
@@ -20,11 +21,9 @@ typedef struct Regex {
 
     char *str;
     // Reference to the parent of current regex
-    struct Regex *upper;
-    // Reference to next of the current position
-    // of regex stack
-    struct Regex *down;
-    list *subs;
+    struct Regex *parent;
+    struct Regex *left;
+    struct Regex *right;
 } Regex;
 
 
@@ -35,31 +34,19 @@ typedef struct Regex {
 #define REGEX_STR(R) ((R)->str)
 #define REGEX_SET_STR(R, S) ((R)->str = (S))
 
-#define REGEX_DOWN(R) ((R)->down)
-#define REGEX_SET_DOWN(R, D) ((R)->down = (D))
+#define REGEX_PARENT(R) ((R)->parent)
+#define REGEX_SET_PARENT(R, P) ((R)->up = (P))
 
-#define REGEX_SUBS(R) ((R)->subs)
-#define REGEX_SET_SUBS(R, S) ((R)->subs = (S))
+#define REGEX_LEFT(R) ((R)->left)
+#define REGEX_SET_LEFT(R, L) ((R)->left = (L))
 
-#define REGEX_UPPER(R) ((R)->upper)
-#define REGEX_SET_UPPER(R, U) ((R)->upper = (U))
-
-#define REGEX_OP_IS_MARKER(OP) ((OP) > REGEX_OP_RIGHT_PAREN)
-
-#define REGEX_PUSH(R, R1) ((R1)->down = (R), (R) = (R1), 0)
-#define REGEX_POP(R) ({\
-    Regex *poped = R;\
-    (R) = (R)->down;\
-    poped->down = NULL; \
-    poped;\
-})
+#define REGEX_RIGHT(R) ((R)->left)
+#define REGEX_SET_RIGHT(R, R_CHILD) ((R)->right = (R_CHILD))
 
 /* Prototypes */
 Regex * regexCreate(RegexOp op, char *str);
 Regex * regexDuplicate(Regex *r);
 void    regexDestruct(Regex *r);
-_Status_t regexAddSub(Regex *sub);
-_Status_t regexPushSub(Regex *sub);
 
 // Use Regex as as stack
 

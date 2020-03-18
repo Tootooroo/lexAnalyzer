@@ -12,7 +12,9 @@ typedef struct listNode {
 } listNode;
 
 typedef struct list {
+    /* Head of list */
     listNode *node;
+    /* Tail of list */
     listNode *tail;
     /* Action(release, _Status_t, OK, ERROR) */
     _Status_t (*release)(void *);
