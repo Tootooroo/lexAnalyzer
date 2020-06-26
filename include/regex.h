@@ -52,3 +52,4 @@ void    regexDestruct(Regex *r);
 
 // Regex parse function
 Regex * regexParse(char *regex_str);
+void regexTestCases(void **state);

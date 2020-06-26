@@ -3,6 +3,7 @@
 #include "regex.h"
 #include "tools.h"
 #include <string.h>
+#include <test.h>
 
 /* Private Prototypes */
 private void doLeftParen(Regex *root, char **pChar);
@@ -149,4 +150,10 @@ private char * doCharacters(Regex *root, char *pChar) {
     }
 
     return end;
+}
+
+
+// Test Cases
+void regexTestCases(void **state) {
+    assert_int_equal(1, 1);
 }
