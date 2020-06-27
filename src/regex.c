@@ -8,7 +8,7 @@
 /* Private Prototypes */
 private void doLeftParen(Regex *root, char **pChar);
 private void doVertical(Regex *root);
-private char * doCharacters(Regex *root, char *pChar);
+private char * doCharacters(Regex *root, char **pChar);
 private Regex * _regexParse(Regex *root, char **regex_str);
 
 /* Private Variables */
@@ -49,9 +49,10 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
 
     char *current = *regex_str;
 
-
-    while (current != NULL) {
+    while (true) {
         char c = *current;
+
+        if (c == '\0') break;
 
         switch (c) {
         case '|':
@@ -70,13 +71,13 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
             break;
         default:
             /* Chaaracters */
-            current = doCharacters(root, current);
+            doCharacters(root, &current);
             continue;
         }
         ++current;
     }
 
-    return root;
+    return REGEX_LEFT(root);
 }
 
 /* Private Procedures */
@@ -94,6 +95,9 @@ private void attach(Regex *root, Regex *node) {
 
 private void doLeftParen(Regex *root, char **pChar) {
     Regex *subRoot = regexCreate(REGEX_OP_ROOT, NULL);
+
+    REGEX_SET_LEFT(subRoot, regexCreate(REGEX_OP_LEFT_PAREN, NULL));
+
     _regexParse(subRoot, pChar);
 
     Regex *subTree = REGEX_LEFT(subRoot),
@@ -124,14 +128,15 @@ private void doVertical(Regex *root) {
     }
 }
 
-#define isAlphabet(c) ('a' < c && c < 'z') || ('A' < c && c < 'Z')
-private char * doCharacters(Regex *root, char *pChar) {
-    char c = *pChar;
-    char *start = pChar, *end = pChar;
+#define isAlphabet(c) ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+private char * doCharacters(Regex *root, char **pChar) {
+    char c = **pChar;
+    char *start = *pChar, *end = *pChar;
 
     while (isAlphabet(c)) {
         c = *(++end);
     }
+    *pChar = end;
 
     int len = end - start;
     char *str = malloc(len);
@@ -141,9 +146,9 @@ private char * doCharacters(Regex *root, char *pChar) {
     Regex *root_node = REGEX_LEFT(root);
     Regex *r = regexCreate(REGEX_OP_CHAR, str);
 
-    if (root_node == NULL)
+    if (root_node == NULL) {
         REGEX_SET_LEFT(root, r);
-    else if (REGEX_RIGHT(root_node) == NULL) {
+    } else if (REGEX_RIGHT(root_node) == NULL) {
         REGEX_SET_RIGHT(root_node, r);
     } else {
         abortWithMsg("doCharacters(): REGEX_RIGHT(root) is not NULL");
@@ -155,5 +160,5 @@ private char * doCharacters(Regex *root, char *pChar) {
 
 // Test Cases
 void regexTestCases(void **state) {
-    assert_int_equal(1, 1);
+    Regex *re = regexParse("abc");
 }

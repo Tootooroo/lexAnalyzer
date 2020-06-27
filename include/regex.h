@@ -24,6 +24,10 @@ typedef struct Regex {
     struct Regex *parent;
     struct Regex *left;
     struct Regex *right;
+
+    // Regex Stack index
+    struct Regex *prev;
+    struct Regex *next;
 } Regex;
 
 
