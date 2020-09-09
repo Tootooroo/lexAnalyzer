@@ -3,7 +3,6 @@
 #include "regex.h"
 #include "tools.h"
 #include <string.h>
-#include <test.h>
 
 /* Private Prototypes */
 private void doLeftParen(Regex *root, char **pChar);
@@ -62,6 +61,7 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
             doLeftParen(root, &current);
             break;
         case ')':
+            doRightParen(root);
             break;
         case '[':
             break;
@@ -116,6 +116,8 @@ private void doLeftParen(Regex *root, char **pChar) {
     }
 }
 
+private void doRightParen(Regex *root) {}
+
 private void doVertical(Regex *root) {
     Regex *root_node = REGEX_LEFT(root);
     Regex *r_vertical = regexCreate(REGEX_OP_VERTICAL_BAR, NULL);
@@ -139,7 +141,7 @@ private char * doCharacters(Regex *root, char **pChar) {
     *pChar = end;
 
     int len = end - start;
-    char *str = malloc(len);
+    char *str = (char *)malloc(len);
 
     strncpy(str, start, len);
 

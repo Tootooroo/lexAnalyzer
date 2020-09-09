@@ -216,7 +216,7 @@ _Bool listIsIterValid(listIter i) {
 }
 
 listIter listGetIter(list *l, LITER_DIR dir) {
-    listIter iter = { 0, 0, 0 };
+    listIter iter = { 0, 0, LITER_FORWARD };
 
     if (isNull(l) || !isListDirValid(dir)) {
         /* Return a invalid iterator */
