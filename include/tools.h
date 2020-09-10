@@ -8,4 +8,7 @@
 void * zMalloc(size_t size);
 void   zFree(void **);
 
+#define isAlphabet(c) \
+    (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'))
+
 #endif /* _TOOLS_H_ */

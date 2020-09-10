@@ -103,15 +103,26 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
 }
 
 /* Private Procedures */
+
+/* Operator specific attach */
+private void attach_specific(Regex *root, Regex *node) {
+    switch (REGEX_OP(node)) {
+    case REGEX_OP_CHAR:
+        break;
+    default:
+        break;
+    }
+}
+
 private void attach(Regex *root, Regex *node) {
     Regex *root_node = REGEX_LEFT(root);
 
     if (root_node == NULL) {
-
+        REGEX_SET_LEFT(root, node);
     } else if (REGEX_RIGHT(root_node) == NULL) {
-
+        REGEX_SET_RIGHT(root_node, node);
     } else {
-
+        attach_specific(root, node);
     }
 }
 
@@ -132,31 +143,15 @@ private void doLeftParen(Regex *root, char **pChar) {
     }
 
     // Mark subtree as a group
+    subTree->isGroup = true;
 
-    if (tree == NULL) {
-        REGEX_SET_LEFT(root, subTree);
-    } else {
-        REGEX_SET_RIGHT(tree, subTree);
-    }
+    attach(root, subTree);
 }
 
-private void doRightParen(Regex *root) {
+private void doRightParen(Regex *root) {}
 
-}
+private void doVertical(Regex *root) {}
 
-private void doVertical(Regex *root) {
-    Regex *root_node = REGEX_LEFT(root);
-    Regex *r_vertical = regexCreate(REGEX_OP_VERTICAL_BAR, NULL);
-
-    if (root_node == NULL) {
-        REGEX_SET_LEFT(root, r_vertical);
-    } else {
-        REGEX_SET_LEFT(r_vertical, root_node);
-        REGEX_SET_LEFT(root, r_vertical);
-    }
-}
-
-#define isAlphabet(c) ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
 private char * doCharacters(Regex *root, char **pChar) {
     char c = **pChar;
     char *start = *pChar, *end = *pChar;
@@ -164,29 +159,21 @@ private char * doCharacters(Regex *root, char **pChar) {
     while (isAlphabet(c)) {
         c = *(++end);
     }
+
+    /* if operator after last char is '*' or '+'
+     * then the last char should as a child of
+     * '*' or '+' operator */
+    if (c == '*' || c == '+') {
+        --end;
+    }
+    /* Update scan pointer position */
     *pChar = end;
 
-    int len = end - start;
-    char *str = (char *)malloc(len);
-
+    /* Create character node and attach
+     * to tree. */
+    char *str = (char *)malloc(end - start);
     strncpy(str, start, len);
-
-    Regex *root_node = REGEX_LEFT(root);
-    Regex *r = regexCreate(REGEX_OP_CHAR, str);
-
-    if (root_node == NULL) {
-        REGEX_SET_LEFT(root, r);
-    } else if (REGEX_RIGHT(root_node) == NULL) {
-        REGEX_SET_RIGHT(root_node, r);
-    } else {
-        abortWithMsg("doCharacters(): REGEX_RIGHT(root) is not NULL");
-    }
+    attach(REGEX_LEFT(root), regexCreate(REGEX_OP_CHAR, str));
 
     return end;
-}
-
-
-// Test Cases
-void regexTestCases(void **state) {
-    Regex *re = regexParse("abc");
 }
