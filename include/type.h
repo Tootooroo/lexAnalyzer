@@ -1,14 +1,13 @@
 /* type.h */
 
-                                                \
-
 #ifndef _TEST_LAB_TYPE_
 #define _TEST_LAB_TYPE_
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #ifndef null
 #define null NULL

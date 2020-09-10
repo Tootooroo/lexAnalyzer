@@ -28,6 +28,9 @@ typedef struct Regex {
     // Regex Stack index
     struct Regex *prev;
     struct Regex *next;
+
+    bool isGroup;
+
 } Regex;
 
 
