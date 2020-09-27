@@ -27,8 +27,7 @@
 #include <string.h>
 
 /* Private Prototypes */
-private void
-doLeftParen(Regex *root, char **pChar);
+private void doLeftParen(Regex *root, char **pChar);
 private void doVertical(Regex *root);
 private char * doCharacters(Regex *root, char **pChar);
 private Regex * _regexParse(Regex *root, char **regex_str);
@@ -105,24 +104,63 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
 /* Private Procedures */
 
 /* Operator specific attach */
-private void attach_specific(Regex *root, Regex *node) {
+
+/* Function that attach node to root_node
+ * root_node should be an operator node */
+private void attach_to_operator_node(Regex *root_node, Regex *node) {
     switch (REGEX_OP(node)) {
     case REGEX_OP_CHAR:
         break;
-    default:
+    case REGEX_OP_START:
+        break;
+    case REGEX_OP_PLUS:
+        break;
+    case REGEX_OP_ALTERNATE:
         break;
     }
+}
+
+private void attach_to_char_node(Regex *root, Regex *node) {
+    Regex *op, *root_node = REGEX_LEFT(root);
+
+    switch (REGEX_OP(node)) {
+    case REGEX_OP_CHAR:
+        op = regexCreate(REGEX_OP_CONCATE, NULL);
+        attach_to_char_node(root, op);
+        attach_to_operator_node(root, node);
+        return;
+    case REGEX_OP_START:
+        op = regexCreate(REGEX_OP_START, NULL);
+        break;
+    case REGEX_OP_PLUS:
+        op = regexCreate(REGEX_OP_PLUS, NULL);
+        break;
+    case REGEX_OP_ALTERNATE:
+        op = regexCreate(REGEX_OP_ALTERNATE, NULL);
+        break;
+    }
+
+    /* Attach operator node to root */
+    REGEX_SET_LEFT(op, root_node);
+    REGEX_SET_LEFT(root, op);
 }
 
 private void attach(Regex *root, Regex *node) {
     Regex *root_node = REGEX_LEFT(root);
 
     if (root_node == NULL) {
+        /* Empty tree */
         REGEX_SET_LEFT(root, node);
-    } else if (REGEX_RIGHT(root_node) == NULL) {
+    } else if (REGEX_OP(root_node) != REGEX_OP_CHAR &&
+               REGEX_RIGHT(root_node) == NULL) {
+        /* Incompleted operator node */
         REGEX_SET_RIGHT(root_node, node);
+    } else if (REGEX_OP(root_node) == REGEX_OP_CHAR) {
+        /* Character node */
+        attach_to_char_node(root, node);
     } else {
-        attach_specific(root, node);
+        /* Completed operator node */
+        attach_to_operator_node(root, node);
     }
 }
 
@@ -171,7 +209,8 @@ private char * doCharacters(Regex *root, char **pChar) {
 
     /* Create character node and attach
      * to tree. */
-    char *str = (char *)malloc(end - start);
+    int len = end - start;
+    char *str = (char *)malloc(len);
     strncpy(str, start, len);
     attach(REGEX_LEFT(root), regexCreate(REGEX_OP_CHAR, str));
 
