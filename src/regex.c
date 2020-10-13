@@ -188,7 +188,10 @@ private void doLeftParen(Regex *root, char **pChar) {
 
 private void doRightParen(Regex *root) {}
 
-private void doVertical(Regex *root) {}
+private void doVertical(Regex *root) {
+    Regex *node = regexCreate(REGEX_OP_ALTERNATE, NULL);
+    attach(root, node);
+}
 
 private char * doCharacters(Regex *root, char **pChar) {
     char c = **pChar;
@@ -198,18 +201,12 @@ private char * doCharacters(Regex *root, char **pChar) {
         c = *(++end);
     }
 
-    /* if operator after last char is '*' or '+'
-     * then the last char should as a child of
-     * '*' or '+' operator */
-    if (c == '*' || c == '+') {
-        --end;
-    }
     /* Update scan pointer position */
     *pChar = end;
 
     /* Create character node and attach to tree. */
     int len = end - start;
-    char *str = (char *)malloc(len);
+    char *str = (char *)calloc(1, len+1);
     strncpy(str, start, len);
     attach(root, regexCreate(REGEX_OP_CHAR, str));
 

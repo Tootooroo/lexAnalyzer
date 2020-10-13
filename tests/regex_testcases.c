@@ -34,7 +34,29 @@ START_TEST(REGEX_CHAR) {
 END_TEST
 
 START_TEST(REGEX_ALTERNATE) {
+
+    /* Case 1 */
     Regex *tree = regexParse("a|b");
+
+    /* Check op node */
+    ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(tree));
+
+    /* Check left child node */
+    Regex *left = REGEX_LEFT(tree);
+    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(left));
+    ck_assert_str_eq("a", REGEX_STR(left));
+
+    /* Check right child node */
+    Regex *right = REGEX_RIGHT(tree);
+    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(right));
+    ck_assert_str_eq("b", REGEX_STR(right));
+
+    /* Case 2 */
+    tree = regexParse("a|b|c");
+
+    /* Check op node */
+    ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(tree));
+    ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(REGEX_LEFT(tree)));
 }
 
 Suite *regex_suite(void) {
@@ -42,6 +64,7 @@ Suite *regex_suite(void) {
     TCase *tcases = tcase_create("REGEX_TESTCASES");
 
     tcase_add_test(tcases, REGEX_CHAR);
+    tcase_add_test(tcases, REGEX_ALTERNATE);
     suite_add_tcase(suite, tcases);
 
     return suite;

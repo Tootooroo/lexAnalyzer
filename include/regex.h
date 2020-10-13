@@ -47,7 +47,7 @@ typedef struct Regex {
 #define REGEX_LEFT(R) ((R)->left)
 #define REGEX_SET_LEFT(R, L) ((R)->left = (L))
 
-#define REGEX_RIGHT(R) ((R)->left)
+#define REGEX_RIGHT(R) ((R)->right)
 #define REGEX_SET_RIGHT(R, R_CHILD) ((R)->right = (R_CHILD))
 
 /* Prototypes */
