@@ -13,5 +13,5 @@ include_directories(${HEADERS})
 add_executable(analyzer ${SOURCES_FILES})
 
 project(test)
-link_libraries(cmocka)
-add_executable(test src/test.c ${SOURCES_FILES})
+link_libraries(check)
+add_executable(test tests/regex_testcases.c ${SOURCES_FILES})

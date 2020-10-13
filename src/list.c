@@ -32,7 +32,6 @@ private _Status_t listNodeCancate(listNode *, listNode *);
 /* Public functions */
 list * listCreate(void) {
     list *l = (list *)calloc(sizeof(list), 1);
-
     return l;
 }
 

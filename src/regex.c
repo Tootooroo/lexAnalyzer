@@ -207,12 +207,11 @@ private char * doCharacters(Regex *root, char **pChar) {
     /* Update scan pointer position */
     *pChar = end;
 
-    /* Create character node and attach
-     * to tree. */
+    /* Create character node and attach to tree. */
     int len = end - start;
     char *str = (char *)malloc(len);
     strncpy(str, start, len);
-    attach(REGEX_LEFT(root), regexCreate(REGEX_OP_CHAR, str));
+    attach(root, regexCreate(REGEX_OP_CHAR, str));
 
     return end;
 }
