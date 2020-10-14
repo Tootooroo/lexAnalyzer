@@ -59,12 +59,28 @@ START_TEST(REGEX_ALTERNATE) {
     ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(REGEX_LEFT(tree)));
 }
 
+START_TEST(REGEX_GROUP) {
+    /* Case 1 */
+    Regex *tree = regexParse("(abc)");
+
+    /* Check op node */
+    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(tree));
+    ck_assert_int_eq(true, tree->isGroup);
+
+    /* Case 2 */
+    //tree = regexParse("(abc)|(defg)");
+
+    /* Case 3 */
+    //tree = regexParse("((a(bc)d)|(ef(g)h))");
+}
+
 Suite *regex_suite(void) {
     Suite *suite = suite_create("Regex");
     TCase *tcases = tcase_create("REGEX_TESTCASES");
 
     tcase_add_test(tcases, REGEX_CHAR);
     tcase_add_test(tcases, REGEX_ALTERNATE);
+    tcase_add_test(tcases, REGEX_GROUP);
     suite_add_tcase(suite, tcases);
 
     return suite;
@@ -76,5 +92,8 @@ int main(void) {
 
     srunner_set_fork_status(runner, CK_NOFORK);
     srunner_run_all(runner, CK_NORMAL);
-    return 0;
+    int number_failed = srunner_ntests_failed(runner);
+    srunner_free(runner);
+
+    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

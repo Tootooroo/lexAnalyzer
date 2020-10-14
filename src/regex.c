@@ -80,9 +80,12 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
             doVertical(root);
             break;
         case '(':
+            /* Ignore '(' */
+            ++current;
             doLeftParen(root, &current);
             break;
         case ')':
+            goto PARSE_DONE;
             break;
         case '[':
             break;
@@ -98,6 +101,7 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
         ++current;
     }
 
+ PARSE_DONE:
     return REGEX_LEFT(root);
 }
 
@@ -107,7 +111,9 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
 
 /* Function that attach node to root_node
  * root_node should be an operator node */
-private void attach_to_operator_node(Regex *root_node, Regex *node) {
+private void attach_to_operator_node(Regex *root, Regex *node) {
+    Regex *op_node, *root_node = REGEX_LEFT(root);
+
     switch (REGEX_OP(node)) {
     case REGEX_OP_CHAR:
         break;
@@ -116,6 +122,10 @@ private void attach_to_operator_node(Regex *root_node, Regex *node) {
     case REGEX_OP_PLUS:
         break;
     case REGEX_OP_ALTERNATE:
+        op_node = regexCreate(REGEX_OP_ALTERNATE, NULL);
+        /* op_node as new root node  */
+        REGEX_SET_LEFT(op_node, root_node);
+        REGEX_SET_LEFT(root, op_node);
         break;
     }
 }
@@ -166,8 +176,6 @@ private void attach(Regex *root, Regex *node) {
 
 private void doLeftParen(Regex *root, char **pChar) {
     Regex *subRoot = regexCreate(REGEX_OP_ROOT, NULL);
-
-    REGEX_SET_LEFT(subRoot, regexCreate(REGEX_OP_LEFT_PAREN, NULL));
 
     _regexParse(subRoot, pChar);
 
