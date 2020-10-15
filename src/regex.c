@@ -31,9 +31,11 @@ private void doLeftParen(Regex *root, char **pChar);
 private void doVertical(Regex *root);
 private char * doCharacters(Regex *root, char **pChar);
 private Regex * _regexParse(Regex *root, char **regex_str);
+private void attach(Regex *root, Regex *node);
 
 /* Private Variables */
-Regex *regexTree;
+private Regex *regexTree;
+
 
 /* Public Procedures */
 Regex * regexCreate(RegexOp op, char *str) {
@@ -86,8 +88,9 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
             break;
         case ')':
             goto PARSE_DONE;
-            break;
         case '[':
+            break;
+        case ']':
             break;
         case '*':
             break;
@@ -102,6 +105,7 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
     }
 
  PARSE_DONE:
+    *regex_str = current;
     return REGEX_LEFT(root);
 }
 
@@ -116,16 +120,19 @@ private void attach_to_operator_node(Regex *root, Regex *node) {
 
     switch (REGEX_OP(node)) {
     case REGEX_OP_CHAR:
+        op_node = regexCreate(REGEX_OP_CONCATE, NULL);
+        REGEX_SET_LEFT(op_node, root_node);
+        REGEX_SET_RIGHT(op_node, node);
+        REGEX_SET_LEFT(root, op_node);
         break;
     case REGEX_OP_START:
         break;
     case REGEX_OP_PLUS:
         break;
     case REGEX_OP_ALTERNATE:
-        op_node = regexCreate(REGEX_OP_ALTERNATE, NULL);
         /* op_node as new root node  */
-        REGEX_SET_LEFT(op_node, root_node);
-        REGEX_SET_LEFT(root, op_node);
+        REGEX_SET_LEFT(node, root_node);
+        REGEX_SET_LEFT(root, node);
         break;
     }
 }
@@ -136,8 +143,8 @@ private void attach_to_char_node(Regex *root, Regex *node) {
     switch (REGEX_OP(node)) {
     case REGEX_OP_CHAR:
         op = regexCreate(REGEX_OP_CONCATE, NULL);
-        attach_to_char_node(root, op);
-        attach_to_operator_node(root, node);
+        attach(root, op);
+        attach(root, node);
         return;
     case REGEX_OP_START:
         op = regexCreate(REGEX_OP_START, NULL);
@@ -148,6 +155,8 @@ private void attach_to_char_node(Regex *root, Regex *node) {
     case REGEX_OP_ALTERNATE:
         op = regexCreate(REGEX_OP_ALTERNATE, NULL);
         break;
+    case REGEX_OP_CONCATE:
+        op = regexCreate(REGEX_OP_CONCATE, NULL);
     }
 
     /* Attach operator node to root */

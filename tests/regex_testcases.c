@@ -25,10 +25,25 @@
 #include "regex.h"
 #include "check.h"
 
+_Bool is_regex_tree_expected(Regex *tree, int *expected, int idx) {
+
+    _Bool expected_current = REGEX_OP(tree) == expected[idx];
+
+    if (REGEX_LEFT(tree) == NULL && REGEX_RIGHT(tree) == NULL) {
+        return expected_current;
+    }
+
+    _Bool expected_left = is_regex_tree_expected(REGEX_LEFT(tree), expected, idx*2);
+    _Bool expected_right = is_regex_tree_expected(REGEX_RIGHT(tree), expected, idx*2+1);
+
+    return expected_current && expected_left && expected_right;
+}
+
 START_TEST(REGEX_CHAR) {
     Regex *tree = regexParse("abc");
 
-    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(tree));
+    int tree_shape[1] = { REGEX_OP_CHAR };
+    ck_assert(is_regex_tree_expected(tree, tree_shape, 0));
     ck_assert_str_eq("abc", REGEX_STR(tree));
 }
 END_TEST
@@ -57,21 +72,41 @@ START_TEST(REGEX_ALTERNATE) {
     /* Check op node */
     ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(tree));
     ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(REGEX_LEFT(tree)));
+
+    /* Case 3 */
+    tree = regexParse("|");
+
+    /* Wrong regex expression */
+    ck_assert_ptr_eq(tree, NULL);
 }
 
 START_TEST(REGEX_GROUP) {
-    /* Case 1 */
-    Regex *tree = regexParse("(abc)");
+    Regex *tree;
 
-    /* Check op node */
+    /* Case 1 */
+    tree = regexParse("(abc)");
     ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(tree));
     ck_assert_int_eq(true, tree->isGroup);
 
     /* Case 2 */
-    //tree = regexParse("(abc)|(defg)");
+    tree = regexParse("(abc)|(defg)");
+    ck_assert_int_eq(REGEX_OP_ALTERNATE, REGEX_OP(tree));
+    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(REGEX_LEFT(tree)));
+    ck_assert_int_eq(true, REGEX_LEFT(tree)->isGroup);
+    ck_assert_int_eq(REGEX_OP_CHAR, REGEX_OP(REGEX_RIGHT(tree)));
+    ck_assert_int_eq(true, REGEX_RIGHT(tree)->isGroup);
 
     /* Case 3 */
-    //tree = regexParse("((a(bc)d)|(ef(g)h))");
+    tree = regexParse("((a(bc)d)|(ef(g)h))");
+    int expected[] =
+        {
+         REGEX_OP_ROOT,
+         REGEX_OP_ALTERNATE, REGEX_OP_CONCATE, REGEX_OP_CONCATE,
+         REGEX_OP_CONCATE, REGEX_OP_CHAR, REGEX_OP_CONCATE,
+         REGEX_OP_CHAR, REGEX_OP_CHAR, REGEX_OP_CHAR, 0, 0,
+         REGEX_OP_CHAR, REGEX_OP_CHAR
+        };
+    ck_assert(is_regex_tree_expected(tree, expected, 1));
 }
 
 Suite *regex_suite(void) {
