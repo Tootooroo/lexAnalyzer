@@ -24,6 +24,7 @@
 #include "type.h"
 #include "regex.h"
 #include "tools.h"
+#include <setjmp.h>
 #include <string.h>
 
 /* Private Prototypes */
@@ -31,11 +32,13 @@ private void doLeftParen(Regex *root, char **pChar);
 private void doVertical(Regex *root);
 private char * doCharacters(Regex *root, char **pChar);
 private Regex * _regexParse(Regex *root, char **regex_str);
+private void doStart(Regex *root);
+private void doPlus(Regex *root);
 private void attach(Regex *root, Regex *node);
 
 /* Private Variables */
 private Regex *regexTree;
-
+private jmp_buf regex_entry;
 
 /* Public Procedures */
 Regex * regexCreate(RegexOp op, char *str) {
@@ -63,6 +66,12 @@ void regexDestruct(Regex *r) {
 
 Regex * regexParse(char *regex_str) {
     regexTree = regexCreate(REGEX_OP_ROOT, NULL);
+
+    /* Setjmp for error handling */
+    if (setjmp(regex_entry)) {
+        return NULL;
+    }
+
     return _regexParse(regexTree, &regex_str);
 }
 
@@ -89,12 +98,16 @@ private Regex * _regexParse(Regex *root, char **regex_str) {
         case ')':
             goto PARSE_DONE;
         case '[':
+            longjmp(regex_entry, 1);
             break;
         case ']':
+            longjmp(regex_entry, 1);
             break;
         case '*':
+            doStart(root);
             break;
         case '+':
+            doPlus(root);
             break;
         default:
             /* Chaaracters */
@@ -203,7 +216,15 @@ private void doLeftParen(Regex *root, char **pChar) {
     attach(root, subTree);
 }
 
-private void doRightParen(Regex *root) {}
+private void doStart(Regex *root) {
+    Regex *node = regexCreate(REGEX_OP_START, NULL);
+    attach(root, node);
+}
+
+private void doPlus(Regex *root) {
+    Regex *node = regexCreate(REGEX_OP_PLUS, NULL);
+    attach(root, node);
+}
 
 private void doVertical(Regex *root) {
     Regex *node = regexCreate(REGEX_OP_ALTERNATE, NULL);
