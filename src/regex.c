@@ -139,11 +139,8 @@ private void attach_to_operator_node(Regex *root, Regex *node) {
         REGEX_SET_LEFT(root, op_node);
         break;
     case REGEX_OP_START:
-        break;
     case REGEX_OP_PLUS:
-        break;
     case REGEX_OP_ALTERNATE:
-        /* op_node as new root node  */
         REGEX_SET_LEFT(node, root_node);
         REGEX_SET_LEFT(root, node);
         break;

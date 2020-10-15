@@ -111,6 +111,16 @@ START_TEST(REGEX_GROUP) {
 }
 END_TEST
 
+START_TEST(REGEX_PLUS) {
+
+}
+END_TEST
+
+START_TEST(REGEX_START) {
+
+}
+END_TEST
+
 Suite *regex_suite(void) {
     Suite *suite = suite_create("Regex");
     TCase *tcases = tcase_create("REGEX_TESTCASES");
