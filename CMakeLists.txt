@@ -14,4 +14,8 @@ add_executable(analyzer ${SOURCES_FILES})
 
 project(test)
 link_libraries(check)
+link_libraries(m)
+link_libraries(rt)
+link_libraries(pthread)
+link_libraries(subunit)
 add_executable(test tests/regex_testcases.c ${SOURCES_FILES})

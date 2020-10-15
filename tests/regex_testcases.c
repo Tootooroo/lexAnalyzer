@@ -79,6 +79,7 @@ START_TEST(REGEX_ALTERNATE) {
     /* Wrong regex expression */
     ck_assert_ptr_eq(tree, NULL);
 }
+END_TEST
 
 START_TEST(REGEX_GROUP) {
     Regex *tree;
@@ -108,6 +109,7 @@ START_TEST(REGEX_GROUP) {
         };
     ck_assert(is_regex_tree_expected(tree, expected, 1));
 }
+END_TEST
 
 Suite *regex_suite(void) {
     Suite *suite = suite_create("Regex");
